@@ -1,0 +1,107 @@
+{% extends 'user_layout.twig' %}
+
+{% block title %}Kemaskini Pengumuman{% endblock %}
+{% block content %}
+    <div class="flex flex-col w-full ">
+        <div class="-m-1.5 overflow-x-auto">
+            <div class="p-1.5 min-w-full inline-block align-middle">
+                <div class="overflow-hidden">
+                    <table class="max-w-screen-xl w-full divide-y divide-gray-200 dark:divide-gray-700" id="editable-table">
+                        <thead>
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-center font-bold text-xs text-gray-500 dark:text-gray-300 uppercase">Tajuk</th>
+                            <th scope="col" class="px-6 py-3 text-center font-bold text-xs text-gray-500 dark:text-gray-300 uppercase">Pengumuman</th>
+                            <th scope="col" class="px-6 py-3 text-center font-bold text-xs text-gray-500 dark:text-gray-300 uppercase">Hapus</th>
+                        </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700 text-center">
+                        {% for value in data %}
+                            <tr class="hover:bg-gray-100 dark:hover:bg-gray-700">
+                                <td contenteditable="true" class="px-6 py-3 whitespace-nowrap text-sm font-medium text-gray-800 dark:text-gray-200">{{ value.0|raw }}</td>
+                                <td contenteditable="true" class="px-6 py-3 text-start text-sm font-medium text-gray-800 dark:text-gray-200 max-w-screen-md">
+                                    {{ value.1|raw }}
+                                </td>
+                                <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">
+                                    <button type="button" class="delete-row py-3 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-red-500 text-white hover:bg-red-600 disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600">
+                                        Hapus
+                                    </button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4 space-x-5 flex justify-between">
+        <button id="add-row" type="button" class="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-teal-500 text-white hover:bg-teal-600 disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600">
+            Tambah
+        </button>
+        <button id="submit-table" type="button" class="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-teal-500 text-white hover:bg-teal-600 disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600">
+            Hantar
+        </button>
+    </div>
+    <script>
+        $(document).ready(function () {
+            function addRow() {
+                let newRow = `
+                    <tr class="hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <td contenteditable="true" class="px-6 py-3 whitespace-nowrap text-sm font-medium text-gray-800 dark:text-gray-200"></td>
+                        <td contenteditable="true" class="px-6 py-3 text-start text-sm font-medium text-gray-800 dark:text-gray-200 max-w-screen-md"></td>
+                        <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">
+                            <button type="button" class="delete-row py-3 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-red-500 text-white hover:bg-red-600 disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600">
+                                Hapus
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                $('#editable-table tbody').append(newRow);
+            }
+
+            function deleteRow() {
+                $(this).closest('tr').remove();
+            }
+
+            // Add row button click event
+            $('#add-row').on('click', addRow);
+
+            // Delete row button click event
+            $('#editable-table').on('click', '.delete-row', deleteRow);
+
+            $('#submit-table').on('click', function () {
+                let data = [];
+                $('#editable-table tbody tr').each(function () {
+                    let row = [];
+                    $(this).find('td').each(function (node, index) {
+                        if (index !== 2) {
+                            row.push($.trim(($(this).text())));
+                        }
+                    });
+                    data.push(row);
+                });
+
+                $.ajax({
+                    url: '{{ path() }}/crud_announcements',
+                    method: 'POST',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify({data}),
+                    success: function (res) {
+                        if (res.success) {
+                            alert(`Berjaya Kemaskini`);
+                        } else {
+                            alert('Gagal..server');
+                        }
+                    },
+                    error: function (e) {
+                        alert(`Gagal..ajax`);
+                        console.error(e);
+                    }
+                }).then(function () {
+                    location.reload();
+                });
+            });
+        });
+    </script>
+{% endblock %}

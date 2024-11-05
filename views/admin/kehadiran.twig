@@ -1,0 +1,121 @@
+{% extends 'user_layout.twig' %}
+
+{% block title %}Kemaskini Kehadiran{% endblock %}
+{% block content %}
+    <div class="flex flex-col w-full ">
+        <div class="-m-1.5 overflow-x-auto">
+            <div class="p-1.5 min-w-full inline-block align-middle">
+                <div class="overflow-hidden">
+                    <table class="max-w-screen-xl w-full divide-y divide-gray-200 dark:divide-gray-700" id="editable-table">
+                        <thead>
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-center font-bold text-xs text-gray-500 dark:text-gray-300 uppercase">No Aktiviti</th>
+                            <th scope="col" class="px-6 py-3 text-center font-bold text-xs text-gray-500 dark:text-gray-300 uppercase">Kehdairan</th>
+                            <th scope="col" class="px-6 py-3 text-center font-bold text-xs text-gray-500 dark:text-gray-300 uppercase">Hapus Kehadiran Aktiviti</th>
+                        </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700 text-center">
+                        {% for key, value in data.kehadiran %}
+                            {% set id = user.idMurid %}
+                            <tr class="hover:bg-gray-100 dark:hover:bg-gray-700">
+                                <td class="px-6 py-3 whitespace-nowrap text-sm font-medium text-gray-800 dark:text-gray-200">#{{ key+1 }}</td>
+                                <td class="px-6 py-3 whitespace-nowrap text-sm font-medium text-gray-800 dark:text-gray-200">
+                                    <input type="checkbox" {{ value ? 'checked="true"' : '' }}>
+                                </td>
+                                <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">
+                                    <button type="button" class="delete-row py-3 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-red-500 text-white hover:bg-red-600 disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600">
+                                        Hapuskan
+                                    </button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4 space-x-5 flex justify-between">
+        <button id="add-row" type="button" class="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-teal-500 text-white hover:bg-teal-600 disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600">
+            Tambah Rekod
+        </button>
+        <button id="submit-table" type="button" class="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-teal-500 text-white hover:bg-teal-600 disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600">
+            Hantar
+        </button>
+    </div>
+
+<script src="{{ js('jquery-ui.js') }}"></script>
+<link rel="stylesheet" href="{{ css('jquery-ui.css') }}">
+<script>
+    $(document).ready(function () {
+        // Add Row functionality
+        $('#add-row').click(function () {
+            let rowCount = $('#editable-table tbody tr').length;
+            let newRow = '<tr class="hover:bg-gray-100 dark:hover:bg-gray-700">' +
+                '<td class="px-6 py-3 whitespace-nowrap text-sm font-medium text-gray-800 dark:text-gray-200">#' + (rowCount + 1) + '</td>' +
+                '<td class="px-6 py-3 whitespace-nowrap text-sm font-medium text-gray-800 dark:text-gray-200"> <input type="checkbox"> </td>' +
+                '<td class="px-6 py-3 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">' +
+                '<button type="button" class="delete-row py-3 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-red-500 text-white hover:bg-red-600 disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600">Hapuskan</button>'+
+            '</td></tr>'
+            $('#editable-table tbody').append(newRow);
+        });
+
+        // Delete Row functionality
+        $(document).on('click', '.delete-row', function () {
+            $(this).closest('tr').remove();
+            // Update Aktiviti No. after deleting a row
+            updateAktivitiNumbers();
+        });
+
+        // Function to update Aktiviti No. after deleting a row
+        function updateAktivitiNumbers() {
+            $('#editable-table tbody tr').each(function (index) {
+                $(this).find('td:first').text('#' + (index + 1));
+            });
+        }
+
+        // Make the rows sortable
+        $('#editable-table tbody').sortable({
+            update: function () {
+                updateAktivitiNumbers();
+            }
+        });
+
+        $('#submit-table').on('click', function () {
+            let data = [];
+            $('#editable-table tbody tr').each(function () {
+                $(this).find('td').each(function (index) {
+                    let value = $(this).find('input[type="checkbox"]').prop('checked');
+                    if (value !== undefined) {
+                        data.push(value)
+                    }
+                });
+            });
+
+            // console.log(data);
+
+            $.ajax({
+                url: '{{ path() }}/edit_attendance',
+                method: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ data }),
+                success: function (res) {
+                    console.log(res)
+                    if (res.success) {
+                        alert(`Berjaya Kemaskini`);
+                    } else {
+                        alert('Gagal kemaskini..Kesalahan server');
+                    }
+                },
+                error: function (e) {
+                    alert(`Gagal kemaskini..Kesalahan ajax`);
+                    console.error(e);
+                }
+            }).then(function () {
+                location.reload();
+            });
+        });
+    })
+</script>
+{% endblock %}

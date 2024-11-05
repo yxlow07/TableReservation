@@ -1,0 +1,105 @@
+{% extends 'user_layout.twig' %}
+{% block title %}Choose Your Table{% endblock %}
+{% block content %}
+    <div class="max-w-screen-xl mx-auto grid gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
+        {% for table in model.data %}
+            {% if table.tableName is not empty %}
+                {% set hash = table.tableId|hash('md5') %}
+                <!-- Table Card Container -->
+                <div class="bg-white dark:bg-gray-800 shadow-lg rounded-lg">
+                    <div class="{% if table.currentlyRegistered %}bg-green-500{% elseif table.status == 'Full' %}bg-red-500{% else %}bg-gray-500{% endif %} text-white px-6 py-4 rounded-t flex justify-center items-center">
+                        <h2 class="text-2xl font-semibold overflow-hidden line-clamp-1 font-chinese">{{ table.tableName }}</h2>
+                    </div>
+                    <div class="p-6">
+                        <p class="text-gray-700 dark:text-gray-300 max-h-60 overflow-hidden font-chinese">
+                            <strong>Participants:</strong> {{ table.participants|join(', ') }}
+                        </p>
+                        <p class="mt-4 text-right flex justify-start {% if table.status == 'Full' %}text-red-500{% else %}text-green-700{% endif %}">
+                            <strong>Status:&nbsp</strong> {{ table.status }}
+                        </p>
+                        <div class="mt-2">
+                            <button class="text-blue-500 hover:underline" onclick="openModal('{{ hash }}')">Book Now...</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="modal-{{ hash }}" class="fixed inset-0 z-50 hidden">
+                    <div class="fixed inset-0 bg-black opacity-50"></div>
+                    <div class="flex items-center justify-center min-h-screen px-4">
+                        <div class="bg-white dark:bg-gray-800 border-2 border-gray-700 rounded-lg overflow-hidden shadow-xl transform transition-all sm:max-w-lg sm:w-full">
+                            <div class="absolute top-2 right-2">
+                                <button type="button" class="text-gray-800 dark:text-white" onclick="closeModal('{{ hash }}')">
+                                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="p-6">
+                                <h3 class="text-xl font-bold text-gray-800 dark:text-gray-200 font-chinese">
+                                    {{ table.tableName }}
+                                </h3>
+                                <p class="dark:text-white font-chinese text-left p-3">
+                                    <strong>Participants:</strong> {{ table.participants|join(', ') }}
+                                </p>
+                                <p class="font-chinese text-left p-3 {% if table.status == 'Full' %}text-red-500{% else %}text-green-700{% endif %}">
+                                    <strong>Status:</strong> {{ table.status }}
+                                </p>
+                                {% if table.status != 'Full' and not registered %}
+                                    <div class="mt-6 flex justify-center">
+                                        <button class="c-btn" type="button">
+                                            <a href="./order/{{ table.tableId }}" data-id="{{ table.tableId }}" data-action="enter">Enter this table now!</a>
+                                        </button>
+                                    </div>
+                                {% endif %}
+                                {% if table.currentlyRegistered %}
+                                    <div class="mt-6 flex justify-center">
+                                        <button class="c-btn" type="button">
+                                            <a href="./leave/{{ table.tableId }}" data-id="{{ table.tableId }}" data-action="leave">Leave this table now!</a>
+                                        </button>
+                                    </div>
+                                {% endif %}
+                                <div class="mt-6 flex justify-center gap-x-4">
+                                    <button type="button" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 dark:bg-slate-900 dark:border-gray-700 dark:text-white dark:hover:bg-gray-800" onclick="closeModal('{{ hash }}')">
+                                        Close
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Table Card Container -->
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    <script>
+        function openModal(hash) {
+            document.getElementById('modal-' + hash).classList.remove('hidden');
+        }
+
+        function closeModal(hash) {
+            document.getElementById('modal-' + hash).classList.add('hidden');
+        }
+
+        $(document).ready(function() {
+            $('.c-btn').click(function(e) {
+                e.preventDefault();
+                $.ajax({
+                    url: $(this).find('a').attr('href'),
+                    type: 'GET',
+                    success: function(response) {
+                        if (response.status.status) {
+                            alert(response.status.msg);
+                            window.location.reload();
+                        } else {
+                            alert(response.status.msg);
+                        }
+                    },
+                    error: function(error) {
+                        console.log(error);
+                        alert("Contact an administrator if you tried multiple times and RELOAD THE PAGE AND still failed.");
+                    }
+                });
+            });
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends 'user_layout.twig' %}
+{% block title %}Homepage{% endblock %}
+{% block content %}
+    <div class="flex-1 flex items-center justify-center overscroll-none" id="content">
+        <div class="text-center">
+            <p class="text-gray-600 dark:text-gray-300 mb-8">Please use the buttons below to navigate the system</p>
+            <div class="grid grid-cols-4 gap-4">
+    {% for route, values in app.nav %}
+        <div class="hs-tooltip flex flex-col items-center">
+            <a class="c-nav-items-tooltip hs-tooltip-toggle" href="{{ path(route) }}">
+                {% if values.2 %}
+                    <span class="fa-stack {% if app.request.path == route %} current-page fa-beat {% endif %}">
+                        <i class="fa-duotone fa-xl {{ values.0[0] }} fa-stack-1x"></i>
+                        <i class="fa-duotone {{ values.0[1] }} fa-stack-4x text-teal-400" style="position: absolute; bottom: 0; right: 0;"></i>
+                    </span>
+                {% else %}
+                    <i class="fa-duotone {{ values.0 }} fa-xl {% if app.request.path == route %} current-page fa-beat {% endif %}"></i>
+                {% endif %}
+                <span class="hs-tooltip-content hs-tooltip-shown:opacity-100 hs-tooltip-shown:visible c-tooltip" role="tooltip">
+                    {{ values.1 }}
+                </span>
+            </a>
+            <div class="pt-3">
+                <a href="{{ path(route) }}" class="c-links"><span>{{ values.1 }}</span></a>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+        </div>
+    </div>
+{% endblock %}
