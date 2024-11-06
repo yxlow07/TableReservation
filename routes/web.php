@@ -28,7 +28,7 @@ $routes->GET('/forgot_password', 'forgot_password')->only($guest);
 $routes->GET('/announcements', [UserController::class, 'announcements']);
 
 //Admin pages
-$routes->GETPOST('/users/{idMurid}/{action}', [AdminController::class, 'crud_users'])->only($admin);
+$routes->GETPOST('/users/{id}/{action}', [AdminController::class, 'crud_users'])->only($admin);
 $routes->GETPOST('/kehadiran/upload', [AdminController::class, 'upload_kehadiran'])->only($admin);
 $routes->GETPOST('/find_user', [AdminController::class, 'find_student'])->only($admin);
 $routes->GETPOST('/set_date', [AdminController::class, 'set_date'])->only($admin);

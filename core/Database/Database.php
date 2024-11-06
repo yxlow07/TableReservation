@@ -66,7 +66,7 @@ class Database
             }
         } else {
             foreach ($attributes as $attribute) {
-                $statement->bindValue(":$attribute", $values->{$attribute});
+                $statement->bindValue(":$attribute", $values->{$attribute} ?? '');
             }
         }
 

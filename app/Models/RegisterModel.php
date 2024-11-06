@@ -28,6 +28,7 @@ class RegisterModel extends ValidationModel
             'id' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 5], [self::RULE_MAX, 'max' => 5]],
             'class' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 4], [self::RULE_MAX, 'max' => 4]],
             'name' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 5], [self::RULE_MAX, 'max' => 15]],
+            'phone' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 10], [self::RULE_MAX, 'max' => 15]],
             'password' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 2], [self::RULE_MAX, 'max' => 15]],
             'confirm' => [self::RULE_REQUIRED, [self::RULE_MATCH, 'match' => 'password', 'matchMsg' => 'must match with password']],
         ];
@@ -40,6 +41,7 @@ class RegisterModel extends ValidationModel
             'password' => 'Password',
             'confirm' => 'Confirm password',
             'class' => 'Class',
+            'phone' => 'Phone',
             'name' => 'Name',
         ];
     }

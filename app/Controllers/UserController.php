@@ -84,14 +84,6 @@ class UserController extends Controller
         }
     }
 
-    private function handleUpdatePassword(ProfileModel $model): void
-    {
-        if ($model->validate($model->rulesUpdatePassword()) && $model->checkPassword() && $model->updateDatabasePasswordOnly()) {
-            App::$app->session->setFlashMessage('success', 'Update successfully');
-            LoginModel::setNewUpdatedUserData(App::$app->user->id);
-        }
-    }
-
     public function announcements(): void
     {
         $announcements = App::$app->database->findAll('announcements');

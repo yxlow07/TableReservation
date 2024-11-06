@@ -4,8 +4,9 @@ namespace app\Models;
 
 use core\App;
 use core\Cookies;
+use core\Models\BaseModel;
 
-class UserModel
+class UserModel extends BaseModel
 {
     public string $id = '';
     public string $name = '';
@@ -14,13 +15,16 @@ class UserModel
     public string $password = '';
     public string|false|array $info = ''; // JSON
     public bool $isAdmin = false;
+    public string $created_at = '';
+    public string $updated_at = '';
 
-    public function __construct()
+    public function __construct(array $data = [])
     {
+        parent::loadData($data);
         $this->decodeInfo();
     }
 
-    public static function deleteUserFromDB(string $id)
+    public static function deleteUserFromDB(string $id): void
     {
         $res = App::$app->database->delete('users', ['id' => $id]);
         App::$app->response->sendJson(['success' => $res], true);

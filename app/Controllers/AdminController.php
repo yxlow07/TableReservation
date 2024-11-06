@@ -54,14 +54,14 @@ class AdminController extends Controller
      * @throws ViewNotFoundException
      * @throws UserNotFoundException|MethodNotAllowedException
      */
-    public function crud_users($idMurid, $action)
+    public function crud_users($id, $action): void
     {
-        $data = (array) LoginModel::getUserFromDB($idMurid, true);
+        $data = (array) LoginModel::getUserFromDB($id);
 
         match ($action) {
             BaseModel::READ => '',
             BaseModel::UPDATE => $this->editUser($data),
-            BaseModel::DELETE => UserModel::deleteUserFromDB($idMurid),
+            BaseModel::DELETE => UserModel::deleteUserFromDB($id),
             default => $data = BaseModel::UNDEFINED,
         };
 
@@ -73,14 +73,10 @@ class AdminController extends Controller
             throw new MethodNotAllowedException();
         }
 
-        if ($action == 'analysis') {
-            $data['xaxis'] = json_encode(array_map(fn($key) => "Aktiviti #" . $key + 1, array_keys(json_decode($data['kehadiran']))));
-        }
-
         $this->render('user_profile', ['data' => $data, 'action' => $action]);
     }
 
-    private function editUser($data)
+    private function editUser($data): void
     {
         $model = new ProfileModel($data);
 
@@ -88,11 +84,11 @@ class AdminController extends Controller
             $model = new ProfileModel(App::$app->request->data());
 
             if ($model->validate() && $model->verifyNoDuplicate($data) && $model->updateDatabase($data)) {
-                App::$app->session->setFlashMessage('success', 'Berjaya kemaskini!');
+                App::$app->session->setFlashMessage('success', 'Updated successfully!');
             }
         }
 
-        $this->render('profile', ['model' => $model, 'isAdmin' => true]);
+        $this->render('edit_profile', ['model' => $model, 'isAdmin' => true]);
         exit;
     }
 
@@ -155,7 +151,7 @@ class AdminController extends Controller
                     }
                 }
             }
-            App::$app->session->setFlashMessage($fail == 0 ? 'success' : 'error', 'CSV Uploaded Successfully!');
+            App::$app->session->setFlashMessage($fail == 0 ? 'success' : 'error', 'CSV Uploaded!');
         }
 
         $this->render('upload_users', ['results' => $uploadResults]);

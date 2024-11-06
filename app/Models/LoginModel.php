@@ -59,7 +59,7 @@ class LoginModel extends ValidationModel
         return true;
     }
 
-    public static function getUserFromDB(string $id, bool $getName = false): UserModel|false
+    public static function getUserFromDB(string $id): UserModel|false
     {
         /** @var UserModel|false $user */
         $user = App::$app->database->findOne('users', conditions: ['id' => $id], class: UserModel::class);
