@@ -23,9 +23,7 @@ class UserModel
     public static function deleteUserFromDB(string $id)
     {
         $res = App::$app->database->delete('users', ['id' => $id]);
-        header('Content-Type: application/json');
-        echo json_encode(['success' => $res]);
-        exit();
+        App::$app->response->sendJson(['success' => $res], true);
     }
 
     public function setCookies(): void
@@ -81,7 +79,7 @@ class UserModel
         return $this;
     }
 
-    public function setInfo(array $info): UserModel
+    public function setInfo(array|string $info): UserModel
     {
         $this->info = $info;
         return $this;
@@ -89,6 +87,6 @@ class UserModel
 
     public function isBasicDataSet(): bool
     {
-        return !empty($this->id) && !empty($this->password) && !empty($this->phone);
+        return !empty($this->id) && !empty($this->password) && !empty($this->phone) && !empty($this->name) && !empty($this->class);
     }
 }

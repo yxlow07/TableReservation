@@ -29,35 +29,25 @@ class AdminController extends Controller
         echo View::make(['/views/admin/'])->renderView($view, $params);
     }
 
-    public function createUsersRules()
+    public function list_users(): void
     {
-        return [
-            'idMurid' => [ValidationModel::RULE_REQUIRED, [ValidationModel::RULE_MIN, 'min' => 5]],
-            'noTel' => [ValidationModel::RULE_REQUIRED, [ValidationModel::RULE_MIN, 'min' => 10], [ValidationModel::RULE_MAX, 'max' => 11]],
-            'namaM' => [ValidationModel::RULE_REQUIRED],
-            'kLMurid' => [ValidationModel::RULE_REQUIRED],
-        ];
-    }
-
-    public function list_users()
-    {
-        $users = (array) App::$app->database->findAll('murid');
+        $users = (array) App::$app->database->findAll('users');
 
         $this->render('users', ['users' => $users]);
     }
 
-    public function createUsers()
+    public function createUsers(): void
     {
         $model = new RegisterModel(App::$app->request->data());
 
         if (App::$app->request->isMethod('post')) {
-            if ($model->validate($this->createUsersRules()) && $model->verifyNoDuplicate() && $model->registerUser() && $model->registerName()) {
-                App::$app->session->setFlashMessage('success', 'Rekod Murid Didaftar Berjaya!');
+            if ($model->validate() && $model->verifyValidID() && $model->verifyNoDuplicate() && $model->registerUser()) {
+                App::$app->session->setFlashMessage('success', 'Registered new user successfully!');
                 redirect('/crud_users');
             }
         }
 
-        $this->render('create_users', ['model' => $model]);
+        echo View::make()->renderView('register', ['model' => $model]);
     }
 
     /**
@@ -106,7 +96,7 @@ class AdminController extends Controller
         exit;
     }
 
-    public function crud_announcements()
+    public function crud_announcements(): void
     {
         $data = App::$app->database->findAll('announcements');;
 
@@ -143,29 +133,31 @@ class AdminController extends Controller
 
         if (App::$app->request->isMethod('post') && isset($_FILES['csv']) && $_FILES['csv']['error'] == UPLOAD_ERR_OK) {
             $csv = file($_FILES['csv']['tmp_name'], FILE_IGNORE_NEW_LINES);
-            $result = [];
-            $gagal = 0;
+            $fail = 0;
             foreach ($csv as $line) {
                 $data = str_getcsv($line);
                 $userModel = new UserModel();
-                $userModel->setId($data[0] ?? '')->setPhone($data[1] ?? '')->setPassword($data[2] ?? '12345');
+                $i = 0;
+                $userModel->setId($data[$i++])->setName($data[$i++] ?? 'Anonymous')->setClass($data[$i++] ?? 'Non-student')->setPhone($data[$i++] ?? '+60000000000')
+                    ->setPassword($data[$i++] ?? 'abc123')->setInfo($data[$i++] ?? '[]');
 
                 if ($userModel->isBasicDataSet()) {
                     try {
-                        if (App::$app->database->insert('murid', ['idMurid', 'noTel', 'kLMurid'], $userModel)) {
-                            $uploadResults[] = "Berjaya masukkan rekod murid $data[0]";
+                        if ((new RegisterModel())->registerUser($userModel)) {
+                            $uploadResults[] = "Successfully added record for user - $data[0]";
                         } else {
-                            $uploadResults[] = "Gagal masukkan rekod murid $data[0]";
-                            $gagal++;
+                            $uploadResults[] = "Fail to add record for user - $data[0]";
+                            $fail++;
                         }
                     } catch (\Exception $exception) {
-                        $uploadResults[] = "Gagal masukkan rekod murid $data[0]";
-                        $gagal++;
+                        $uploadResults[] = "Fail to add record for user - $data[0]";
+                        $fail++;
                     }
                 }
             }
-            App::$app->session->setFlashMessage($gagal == 0 ? 'success' : 'error', 'CSV Dimuatnaik!');
+            App::$app->session->setFlashMessage($fail == 0 ? 'success' : 'error', 'CSV Uploaded Successfully!');
         }
+
         $this->render('upload_users', ['results' => $uploadResults]);
     }
 

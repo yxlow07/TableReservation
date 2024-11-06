@@ -17,7 +17,7 @@ class RegisterModel extends ValidationModel
     public string $updated_at = '';
     public string|false|array $info = ''; // JSON
 
-    public function __construct(array $data)
+    public function __construct(array $data = [])
     {
         parent::loadData($data);
     }
@@ -44,11 +44,11 @@ class RegisterModel extends ValidationModel
         ];
     }
 
-    public function registerUser(): bool
+    public function registerUser(?UserModel $userModel = null): bool
     {
         $this->password = password_hash($this->password, PASSWORD_BCRYPT);
         $this->info = json_encode($this->info);
-        return App::$app->database->insert('users', ['id', 'name', 'class', 'phone', 'password', 'info'], $this);
+        return App::$app->database->insert('users', ['id', 'name', 'class', 'phone', 'password', 'info'], !is_null($userModel) ? $userModel : $this);
     }
 
     public function verifyNoDuplicate(): bool
