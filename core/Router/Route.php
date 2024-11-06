@@ -7,6 +7,7 @@ use core\App;
 use core\Exceptions\MiddlewareException;
 use core\Exceptions\ViewNotFoundException;
 use core\Middleware\BaseMiddleware;
+use core\Session;
 use core\View;
 
 class Route
@@ -76,7 +77,9 @@ class Route
 
             /** @var BaseMiddleware $middleware */
             if (!(new $middleware)->execute()) {
-                throw new MiddlewareException("Middleware {$middlewareName} failed!");
+//                throw new MiddlewareException("Middleware {$middlewareName} failed!");
+                App::$app->session->setFlashMessage('error', "Middleware {$middlewareName} failed!");
+                redirect('/');
             }
         }
 

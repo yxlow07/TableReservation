@@ -1,12 +1,12 @@
 {% extends 'user_layout.twig' %}
 {% block title %}Profile{% endblock %}
 {% block content %}
-    <div class="bg-white shadow-xl rounded-lg py-3 border-gray-200 border-2">
+    <div class="bg-white dark:bg-slate-800 dark:text-white shadow-xl rounded-lg py-3 border-gray-200 border-2">
     <div class="photo-wrapper p-2">
         <img class="w-32 h-32 rounded-full mx-auto" src="https://cdn-icons-png.flaticon.com/512/1144/1144760.png" alt="{{ model.name }}">
     </div>
     <div class="p-2">
-        <h3 class="text-center text-3xl text-gray-900 font-medium leading-8">{{ model.name }}</h3>
+        <h3 class="text-center dark:text-white text-3xl text-gray-900 font-medium leading-8">{{ model.name }}</h3>
         <div class="text-center text-gray-400 text-xl font-semibold">
             <p>{{ model.role ?? 'Student' }}</p>
         </div>

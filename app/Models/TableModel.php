@@ -29,11 +29,12 @@ class TableModel extends BaseModel
         }
     }
 
-    public function calculateSeatsLeft(): int
+    public function calculateSeatsLeft(): void
     {
         $occupied = count($this->participants);
         $capacity = $this->capacity;
-        return $capacity - $occupied;
+        $freeSeats = $capacity - $occupied;
+        $this->status = $freeSeats > 0 ? "Available - {$freeSeats} left" : "Full";
     }
 
     public function checkUserAvailability(string $id, $tables): bool

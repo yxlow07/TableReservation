@@ -8,6 +8,7 @@ use app\Models\AdminModel;
 use app\Models\LoginModel;
 use app\Models\ProfileModel;
 use app\Models\RegisterModel;
+use app\Models\TableModel;
 use app\Models\UserModel;
 use core\App;
 use core\Controller;
@@ -28,7 +29,7 @@ class AdminController extends Controller
         echo View::make(['/views/admin/'])->renderView($view, $params);
     }
 
-    public function createUsersRules():array
+    public function createUsersRules()
     {
         return [
             'idMurid' => [ValidationModel::RULE_REQUIRED, [ValidationModel::RULE_MIN, 'min' => 5]],
@@ -38,14 +39,14 @@ class AdminController extends Controller
         ];
     }
 
-    public function list_users(): void
+    public function list_users()
     {
         $users = (array) App::$app->database->findAll('murid');
 
         $this->render('users', ['users' => $users]);
     }
 
-    public function createUsers(): void
+    public function createUsers()
     {
         $model = new RegisterModel(App::$app->request->data());
 
@@ -63,7 +64,7 @@ class AdminController extends Controller
      * @throws ViewNotFoundException
      * @throws UserNotFoundException|MethodNotAllowedException
      */
-    public function crud_users($idMurid, $action): void
+    public function crud_users($idMurid, $action)
     {
         $data = (array) LoginModel::getUserFromDB($idMurid, true);
 
@@ -107,30 +108,33 @@ class AdminController extends Controller
 
     public function crud_announcements()
     {
-        $data = CSVDatabase::returnAllData(Filesystem::resources('/data/announcements.csv'));
+        $data = App::$app->database->findAll('announcements');;
 
         if (App::$app->request->isMethod('post')) {
             $this->uploadAnnouncements();
         }
 
-        $this->render('crud_announcements', ['data' => $data]);
+        $this->render('crud_announcements', ['announcements' => $data]);
     }
 
-    private function uploadAnnouncements()
+    private function uploadAnnouncements(): void
     {
-        header('Content-Type: application/json; charset=utf-8');
         $data = json_decode(App::$app->request->data(true), true);
-        $cleanedData = [];
+        $msg = ''; $status = false;
 
-        foreach ($data['data'] as $datum) {
-            $cleanedData[$datum[0]] = htmlspecialchars($datum[1], ENT_NOQUOTES, "UTF-8");
+        // Validate the data
+        if (!isset($data['title']) || !isset($data['summary']) || !isset($data['content']) || !isset($data['id'])) {
+            $msg = 'Data is not complete';
+        } else {
+            foreach ($data as &$datum) {
+                $datum = htmlspecialchars($datum, ENT_NOQUOTES, "UTF-8");
+            }
+            $id = $data['id'];
+            unset($data['id']);
+            $status = App::$app->database->update('announcements', ['title', 'summary', 'content'], $data, ['id' => $id]);
         }
 
-        $gen = new Generator();
-        $gen->generateCSVFile($cleanedData, Filesystem::resources('/data/announcements.csv'));
-
-        echo json_encode(['success' => true]);
-        exit();
+        App::$app->response->sendJson(['status' => $status, 'msg' => $msg], true);
     }
 
     public function uploadUsers()
@@ -183,14 +187,14 @@ class AdminController extends Controller
         $this->render('attendance', ['data' => $data]);
     }
 
-    public function add_admin()
+    public function add_admin(): void
     {
         $model = new AdminModel();
         if (App::$app->request->isMethod('post')) {
             $model = new AdminModel(App::$app->request->data());
 
             if ($model->validate($model->newAdminRules()) && $model->verifyNoDuplicate() && $model->updateDatabase()) {
-                App::$app->session->setFlashMessage('success', 'Berjaya mendaftar rekod admin');
+                App::$app->session->setFlashMessage('success', 'Successfully created new admin account');
                 redirect();
             }
         }
@@ -211,7 +215,7 @@ class AdminController extends Controller
         $this->render('search', ['users' => $data]);
     }
 
-    public function set_date(): void
+    public function set_date()
     {
         $data = CSVDatabase::returnAllData('dates.csv');
 
@@ -222,5 +226,17 @@ class AdminController extends Controller
         }
 
         $this->render('setdate', ['data' => $data]);
+    }
+
+    public function view_tables(): void
+    {
+        $tables = App::$app->database->findAll('tables', class: TableModel::class, fetchObject: true);
+
+        foreach ($tables as $table) {
+            $table->convertParticipants();
+            $table->calculateSeatsLeft();
+        }
+
+        $this->render('displayTables', ['tables' => $tables]);
     }
 }

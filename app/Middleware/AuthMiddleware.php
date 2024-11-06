@@ -21,7 +21,7 @@ class AuthMiddleware
     {
         if ($this->execute()) return;
 
-        $id = Cookies::getCookie('idMurid');
+        $id = Cookies::getCookie('id');
         $sessionId = Cookies::getCookie('sessionID');
 
         if (is_null($id) || is_null($sessionId)) return;
@@ -31,12 +31,12 @@ class AuthMiddleware
         $user = LoginModel::getUserFromDB($id, true);
 
         if (!$user) {
-            Cookies::unsetCookies(['sessionID', 'idMurid']);
+            Cookies::unsetCookies(['sessionID', 'id']);
             return;
         }
 
-        if ($user->infoMurid['sessionID'] !== $sessionId) {
-            Cookies::unsetCookies(['sessionID', 'idMurid']);
+        if ($user->info['sessionID'] !== $sessionId) {
+            Cookies::unsetCookies(['sessionID', 'id']);
             return;
         }
 

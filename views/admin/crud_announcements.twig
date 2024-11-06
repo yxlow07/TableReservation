@@ -1,107 +1,112 @@
 {% extends 'user_layout.twig' %}
 
-{% block title %}Kemaskini Pengumuman{% endblock %}
+{% block title %}CRUD Announcements{% endblock %}
 {% block content %}
-    <div class="flex flex-col w-full ">
-        <div class="-m-1.5 overflow-x-auto">
-            <div class="p-1.5 min-w-full inline-block align-middle">
-                <div class="overflow-hidden">
-                    <table class="max-w-screen-xl w-full divide-y divide-gray-200 dark:divide-gray-700" id="editable-table">
-                        <thead>
-                        <tr>
-                            <th scope="col" class="px-6 py-3 text-center font-bold text-xs text-gray-500 dark:text-gray-300 uppercase">Tajuk</th>
-                            <th scope="col" class="px-6 py-3 text-center font-bold text-xs text-gray-500 dark:text-gray-300 uppercase">Pengumuman</th>
-                            <th scope="col" class="px-6 py-3 text-center font-bold text-xs text-gray-500 dark:text-gray-300 uppercase">Hapus</th>
-                        </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700 text-center">
-                        {% for value in data %}
-                            <tr class="hover:bg-gray-100 dark:hover:bg-gray-700">
-                                <td contenteditable="true" class="px-6 py-3 whitespace-nowrap text-sm font-medium text-gray-800 dark:text-gray-200">{{ value.0|raw }}</td>
-                                <td contenteditable="true" class="px-6 py-3 text-start text-sm font-medium text-gray-800 dark:text-gray-200 max-w-screen-md">
-                                    {{ value.1|raw }}
-                                </td>
-                                <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">
-                                    <button type="button" class="delete-row py-3 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-red-500 text-white hover:bg-red-600 disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600">
-                                        Hapus
-                                    </button>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
+    <div class="max-w-screen-xl mx-auto grid gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
+        {% for announcement in announcements %}
+            {% if announcement.title is not empty and announcement.content is not empty %}
+                {% set hash = announcement.id %}
+                <!-- Announcement Card Container -->
+                <div class="bg-white dark:bg-gray-800 shadow-lg rounded-lg">
+                    <div class="bg-blue-500 text-white px-6 py-4 rounded-t flex justify-center items-center">
+                        <h2 class="text-2xl font-semibold overflow-hidden line-clamp-1 font-chinese">{{ announcement.title }}</h2>
+                    </div>
+                    <div class="p-6">
+                        <p class="text-gray-700 dark:text-gray-300 max-h-60 overflow-hidden font-chinese">
+                        <p class="text-gray-700 dark:text-gray-300 max-h-60 overflow-hidden font-chinese">
+                            {% if announcement.summary is empty %}
+                                {{ announcement.content|raw }}
+                            {% else %}
+                                {{ announcement.summary|raw }}
+                            {% endif %}
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 mt-4 italic text-right flex justify-start">
+                            {{ announcement.created_at }}
+                        </p>
+                        <div class="mt-2">
+                            <button class="text-blue-500 hover:underline" onclick="openModal('{{ hash }}')">More...</button>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
+                <div id="modal-{{ hash }}" class="fixed inset-0 z-50 hidden">
+                    <div class="fixed inset-0 bg-black opacity-50"></div>
+                    <div class="flex items-center justify-center min-h-screen px-4">
+                        <div class="bg-white dark:bg-gray-800 border-2 border-gray-700 rounded-lg overflow-hidden shadow-xl transform transition-all sm:max-w-lg sm:w-full">
+                            <div class="absolute top-2 right-2">
+                                <button type="button" class="text-gray-800 dark:text-white" onclick="closeModal('{{ hash }}')">
+                                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="p-6">
+                                <h3 class="text-xl font-bold text-gray-800 dark:text-gray-200 font-chinese hover:cursor-text hover:italic" contenteditable="true" data-content="title-{{ hash }}">
+                                    {{ announcement.title }}
+                                </h3>
+                                <p class="dark:text-white font-chinese text-left p-3">
+                                    <strong>Summary:</strong> <span data-content="summary-{{ hash }}" contenteditable="true" class="hover:cursor-text hover:italic">{{ announcement.summary }}</span>
+                                </p>
+                                <p class="dark:text-white font-chinese text-left px-3 pt-3">
+                                    <strong>Content:</strong>
+                                </p>
+                                <p class="dark:text-white font-chinese font-light text-left px-3 pb-3 hover:cursor-text hover:italic" data-content="content-{{ hash }}" contenteditable="true">{{ announcement.content|raw }}</p>
+                                <p class="dark:text-white font-chinese text-left p-3">
+                                    <strong>Created At:</strong> {{ announcement.created_at }}
+                                </p>
+                                <p class="dark:text-white font-chinese text-left p-3">
+                                    <strong>Updated At:</strong> {{ announcement.updated_at }}
+                                </p>
+                                <div class="mt-6 flex justify-center gap-x-4">
+                                    <button type="button" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 dark:bg-slate-900 dark:border-gray-700 dark:text-white dark:hover:bg-gray-800" onclick="editAnnouncement('{{ hash }}')">
+                                        Submit Edit
+                                    </button>
+                                    <button type="button" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 dark:bg-slate-900 dark:border-gray-700 dark:text-white dark:hover:bg-gray-800" onclick="closeModal('{{ hash }}')">
+                                        Close
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Announcement Card Container -->
+            {% endif %}
+        {% endfor %}
     </div>
 
-    <div class="mt-4 space-x-5 flex justify-between">
-        <button id="add-row" type="button" class="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-teal-500 text-white hover:bg-teal-600 disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600">
-            Tambah
-        </button>
-        <button id="submit-table" type="button" class="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-teal-500 text-white hover:bg-teal-600 disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600">
-            Hantar
-        </button>
-    </div>
     <script>
-        $(document).ready(function () {
-            function addRow() {
-                let newRow = `
-                    <tr class="hover:bg-gray-100 dark:hover:bg-gray-700">
-                        <td contenteditable="true" class="px-6 py-3 whitespace-nowrap text-sm font-medium text-gray-800 dark:text-gray-200"></td>
-                        <td contenteditable="true" class="px-6 py-3 text-start text-sm font-medium text-gray-800 dark:text-gray-200 max-w-screen-md"></td>
-                        <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">
-                            <button type="button" class="delete-row py-3 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-red-500 text-white hover:bg-red-600 disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600">
-                                Hapus
-                            </button>
-                        </td>
-                    </tr>
-                `;
-                $('#editable-table tbody').append(newRow);
-            }
+        function openModal(hash) {
+            document.getElementById('modal-' + hash).classList.remove('hidden');
+        }
 
-            function deleteRow() {
-                $(this).closest('tr').remove();
-            }
+        function closeModal(hash) {
+            document.getElementById('modal-' + hash).classList.add('hidden');
+        }
 
-            // Add row button click event
-            $('#add-row').on('click', addRow);
+        function editAnnouncement(hash) {
+            const title = document.querySelector(`[data-content="title-${hash}"]`).innerHTML;
+            const summary = document.querySelector(`[data-content="summary-${hash}"]`).innerHTML;
+            const content = document.querySelector(`[data-content="content-${hash}"]`).innerText; // TODO: Allow for rich text editing
+            const data = {
+                id: hash,
+                title: title.trim(),
+                summary: summary.trim(),
+                content: content.trim()
+            };
 
-            // Delete row button click event
-            $('#editable-table').on('click', '.delete-row', deleteRow);
-
-            $('#submit-table').on('click', function () {
-                let data = [];
-                $('#editable-table tbody tr').each(function () {
-                    let row = [];
-                    $(this).find('td').each(function (node, index) {
-                        if (index !== 2) {
-                            row.push($.trim(($(this).text())));
-                        }
-                    });
-                    data.push(row);
-                });
-
-                $.ajax({
-                    url: '{{ path() }}/crud_announcements',
-                    method: 'POST',
-                    contentType: 'application/json; charset=utf-8',
-                    data: JSON.stringify({data}),
-                    success: function (res) {
-                        if (res.success) {
-                            alert(`Berjaya Kemaskini`);
-                        } else {
-                            alert('Gagal..server');
-                        }
-                    },
-                    error: function (e) {
-                        alert(`Gagal..ajax`);
-                        console.error(e);
-                    }
-                }).then(function () {
-                    location.reload();
-                });
+            $.ajax({
+                url: './crud_announcements',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function(response) {
+                    alert("Successfully updated the announcement.");
+                    window.location.reload();
+                },
+                error: function(error) {
+                    alert("An error occurred while updating the announcement. Contact the developer for more information.");
+                    console.error(error);
+                }
             });
-        });
+        }
     </script>
 {% endblock %}

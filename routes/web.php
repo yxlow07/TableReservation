@@ -14,7 +14,7 @@ $admin = 'auth-admin';
 $routes->GET("/", [UserController::class, 'renderHome']);
 
 // UserModel profiles
-$routes->GETPOST('/register',[AuthController::class, 'register'])->only($guest);
+//$routes->GETPOST('/register',[AuthController::class, 'register'])->only($guest);
 $routes->GETPOST('/login', [AuthController::class, 'login'])->only($guest);
 $routes->GETPOST('/logout', [AuthController::class, 'logout'])->only('auth');
 $routes->GET('/profile', [UserController::class, 'profilePage'])->only($user);
@@ -30,13 +30,15 @@ $routes->GET('/announcements', [UserController::class, 'announcements']);
 //Admin pages
 $routes->GET('/crud_users', [AdminController::class, 'list_users'])->only($admin);
 $routes->GETPOST('/add_admin', [AdminController::class, 'add_admin'])->only($admin);
-$routes->GET('/analysis_attendance', [AdminController::class, 'analysis_kehadiran'])->only($admin);
-$routes->GETPOST('/crud_announcements', [AdminController::class, 'crud_announcements'])->only($admin);
 $routes->GETPOST('/users/create', [AdminController::class, 'createUsers'])->only($admin);
 $routes->GETPOST('/users/upload', [AdminController::class, 'uploadUsers'])->only($admin);
 $routes->GETPOST('/users/{idMurid}/{action}', [AdminController::class, 'crud_users'])->only($admin);
 $routes->GETPOST('/kehadiran/upload', [AdminController::class, 'upload_kehadiran'])->only($admin);
 $routes->GETPOST('/find_user', [AdminController::class, 'find_student'])->only($admin);
 $routes->GETPOST('/set_date', [AdminController::class, 'set_date'])->only($admin);
+
+// Done
+$routes->GETPOST('/view_tables', [AdminController::class, 'view_tables'])->only($admin);
+$routes->GETPOST('/crud_announcements', [AdminController::class, 'crud_announcements'])->only($admin);
 
 return $routes;

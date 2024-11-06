@@ -30,9 +30,11 @@ class UserController extends Controller
             'user' => [
                 '/order_table' => [['fa-check-to-slot', 'fa-pencil-alt'], 'Order your table', true],
                 '/profile' => ['fa-user', 'Profile'],
+                '/announcements' => ['fa-megaphone', 'Announcements'],
             ],
             'admin' => [
                 '/add_admin' => [['fa-user-tie', 'fa-plus'], 'Add Admin', true],
+                '/view_tables' => [['fa-check-to-slot', 'fa-eye'], 'View Tables', true],
                 '/crud_users' => [['fa-users', 'fa-pencil-alt'], 'Edit Users', true],
                 '/find_user' => [['fa-users', 'fa-magnifying-glass'], 'Find User Record', true],
                 '/analysis_attendance' => [['fa-users', 'fa-chart-pie-simple'], 'Analysis Kehadiran', true],
@@ -40,14 +42,13 @@ class UserController extends Controller
             ],
             'general' => [
                 '/' => ['fa-house', 'Homepage'],
-                '/announcements' => ['fa-megaphone', 'Announcements'],
             ],
             'end' => [
                 '/logout' => ['fa-person-from-portal', 'Logout'],
             ],
             'guest' => [
                 '/login' => ['fa-person-to-door', 'Login'],
-                '/register' => ['fa-user-plus', 'Register'],
+//                '/register' => ['fa-user-plus', 'Register'],
             ],
         ];
 

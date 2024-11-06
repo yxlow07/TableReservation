@@ -8,29 +8,32 @@ use core\Models\ValidationModel;
 class AdminModel extends ValidationModel
 {
     public string $idAdmin = '';
-    public string $password = '';
     public string $adminName = '';
-    public string|false|array $permissions = '';
+    public string $password = '';
+    public string|false|array $permissions = ''; // TODO: Implement permissions
+    public string $created_at = '';
+    public string $updated_at = '';
     public bool $isAdmin = true;
 
     public function __construct(array $data = [])
     {
         parent::loadData($data);
+        $this->permissions = $this->permissions ?: '[]';
     }
 
     public function newAdminRules(): array
     {
         return [
             'idAdmin' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 5]],
-            'namaA' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 5]],
-            'kLAdmin' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 5]],
+            'adminName' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 5]],
+            'password' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 3]],
         ];
     }
 
     public function rules(): array
     {
         return [
-            'idMurid' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 5]],
+            'id' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 5]],
             'password' => [self::RULE_REQUIRED, [self::RULE_MIN, 'min' => 5]],
             'rememberMe' => []
         ];
@@ -39,11 +42,10 @@ class AdminModel extends ValidationModel
     public function fieldNames(): array
     {
         return [
-            'idMurid' => 'ID Murid',
+            'id' => 'Admin ID ',
             'password' => 'Password',
-            'idAdmin' => 'ID Admin',
-            'namaA' => 'Nama admin',
-            'kLAdmin' => 'Kata Laluan Admin',
+            'idAdmin' => 'Admin ID ',
+            'adminName' => 'Admin Name',
         ];
     }
 
@@ -52,7 +54,7 @@ class AdminModel extends ValidationModel
         return !empty($this->idAdmin);
     }
 
-    public function verifyNoDuplicate()
+    public function verifyNoDuplicate(): bool
     {
         $check = $this->checkForDuplicates($this->idAdmin);
 
@@ -65,9 +67,10 @@ class AdminModel extends ValidationModel
 
     public function updateDatabase(): bool
     {
-        $this->kLAdmin = password_hash($this->kLAdmin, PASSWORD_BCRYPT);
+        $this->password = password_hash($this->password, PASSWORD_BCRYPT);
+        $this->permissions = json_encode($this->permissions);
         
-        return App::$app->database->insert('admin', ['idAdmin', 'namaA', 'kLAdmin'], $this);
+        return App::$app->database->insert('admin', ['idAdmin', 'adminName', 'password', 'permissions'], $this);
     }
 
     public function checkForDuplicates(string $idAdmin): bool

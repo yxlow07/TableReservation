@@ -28,8 +28,7 @@ class TablesModel extends ValidationModel
 
         foreach ($tables as &$table) {
             $table->convertParticipants();
-            $freeSeats = $table->calculateSeatsLeft();
-            $table->status = $freeSeats > 0 ? "Available - $freeSeats left" : "Full";
+            $table->calculateSeatsLeft();
 
             if (in_array(App::$app->user->id, $table->participants)) {
                 $table->currentlyRegistered = true;

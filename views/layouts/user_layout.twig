@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<html lang="en" class="h-full dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -75,7 +75,7 @@
                         An error occurred
                     </h3>
                     <div class="text-sm text-gray-700 dark:text-gray-400">
-                        {{ app.session.getFlashMessage('success').value }}
+                        {{ app.session.getFlashMessage('error').value }}
                         {% for result in results %}
                             <div class="text-sm text-gray-700 dark:text-gray-400">{{ result }}</div>
                         {% endfor %}
