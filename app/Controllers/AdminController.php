@@ -123,7 +123,7 @@ class AdminController extends Controller
         App::$app->response->sendJson(['status' => $status, 'msg' => $msg], true);
     }
 
-    public function uploadUsers()
+    public function uploadUsers(): void
     {
         $uploadResults = [];
 
@@ -154,25 +154,7 @@ class AdminController extends Controller
             App::$app->session->setFlashMessage($fail == 0 ? 'success' : 'error', 'CSV Uploaded!');
         }
 
-        $this->render('upload_users', ['results' => $uploadResults]);
-    }
-
-    public function analysis_kehadiran()
-    {
-        $kehadirans = App::$app->database->findAll('kehadiran');
-        $data = ['xaxis' => '[', 'yaxis' => '['];
-
-        foreach ($kehadirans as $kehadiran) {
-            $data['xaxis'] .= '"' . $kehadiran['idMurid'] . '",';
-            $data['yaxis'] .= count(array_filter(json_decode($kehadiran['kehadiran']))) . ',';
-        }
-
-        $data['xaxis'] = trim($data['xaxis'], ',');
-        $data['yaxis'] = trim($data['yaxis'], ',');
-        $data['xaxis'] .= ']';
-        $data['yaxis'] .= ']';
-
-        $this->render('attendance', ['data' => $data]);
+        $this->render('upload', ['results' => $uploadResults, 'subject' => 'Users']);
     }
 
     public function add_admin(): void
@@ -190,30 +172,17 @@ class AdminController extends Controller
         $this->render('add_admin', ['model' => $model, 'isAdmin' => true]);
     }
 
-    public function find_student()
+    public function find_student(): void
     {
         $data = [];
 
         if (App::$app->request->isMethod('post')) {
             $query = '%' . App::$app->request->data()['query'] . '%';
-            $data = App::$app->database->findAll('murid', conditions: ['idMurid' => $query, 'noTel' => $query], isSearch: true);
+            $data = App::$app->database->findAll('users', conditions: ['id' => $query, 'class'=> $query, 'name'=> $query], isSearch: true);
             App::$app->response->sendJson($data, true);
         }
 
         $this->render('search', ['users' => $data]);
-    }
-
-    public function set_date()
-    {
-        $data = CSVDatabase::returnAllData('dates.csv');
-
-        if (App::$app->request->isMethod('post')) {
-            $dates = App::$app->request->data()['dates'] ?? [];
-
-            App::$app->response->sendJson(CSVDatabase::saveToDatabase('dates.csv', $dates, 'w') ? 'Berjaya' : 'Gagal', true);
-        }
-
-        $this->render('setdate', ['data' => $data]);
     }
 
     public function view_tables(): void
@@ -226,5 +195,44 @@ class AdminController extends Controller
         }
 
         $this->render('displayTables', ['tables' => $tables]);
+    }
+
+    public function upload_tables()
+    {
+        $uploadResults = [];
+
+        if (App::$app->request->isMethod('post') && isset($_FILES['csv']) && $_FILES['csv']['error'] == UPLOAD_ERR_OK) {
+            $csv = file($_FILES['csv']['tmp_name'], FILE_IGNORE_NEW_LINES);
+            $fail = 0;
+            foreach ($csv as $line) {
+                $data = str_getcsv($line);
+                $tableModel = new TableModel();
+                $i = 0;
+
+                $tableModel->setTableId($data[$i++])->setCapacity($data[$i++])->setTableName($data[$i++] ?? 'Table')->setParticipants($data[$i] ?? '[]');
+
+                if (!$tableModel->isBasicDataSet()) {
+                    $uploadResults[] = "Fail to add record for table - $data[0] (incomplete data)";
+                    $fail++;
+                    break;
+                }
+
+                if (!$tableModel->verifyNoDuplicate()) {
+                    $uploadResults[] = "Fail to add record for table - $data[0] (duplicate)";
+                    $fail++;
+                    break;
+                }
+
+                if ($tableModel->createTable()) {
+                    $uploadResults[] = "Successfully added record for table - $data[0]";
+                } else {
+                    $uploadResults[] = "Fail to add record for table - $data[0] (database)";
+                    $fail++;
+                }
+            }
+            App::$app->session->setFlashMessage($fail == 0 ? 'success' : 'error', 'CSV Uploaded!');
+        }
+
+        $this->render('upload', ['results' => $uploadResults, 'subject' => 'Tables']);
     }
 }

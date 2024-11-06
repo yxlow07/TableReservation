@@ -29,12 +29,13 @@ class TableModel extends BaseModel
         }
     }
 
-    public function calculateSeatsLeft(): void
+    public function calculateSeatsLeft(): int
     {
         $occupied = count($this->participants);
         $capacity = $this->capacity;
         $freeSeats = $capacity - $occupied;
         $this->status = $freeSeats > 0 ? "Available - {$freeSeats} left" : "Full";
+        return $freeSeats;
     }
 
     public function checkUserAvailability(string $id, $tables): bool
@@ -71,6 +72,8 @@ class TableModel extends BaseModel
                         App::$app->database->update('tables', ['participants'], ['participants' => $table->participants], ['tableId' => $tableId]);
                         $msg = 'Successfully registered';
                         $status = true;
+                    } else {
+                        $msg = 'Table is full';
                     }
                 }
             }
@@ -115,5 +118,46 @@ class TableModel extends BaseModel
         }
 
         return ['status' => $status, 'msg' => $msg];
+    }
+
+    // Setters that chain
+    public function setTableId(string $tableId): TableModel
+    {
+        $this->tableId = $tableId;
+        return $this;
+    }
+
+    public function setTableName(string $tableName): TableModel
+    {
+        $this->tableName = $tableName;
+        return $this;
+    }
+
+    public function setParticipants(array|string|false $participants): TableModel
+    {
+        $this->participants = is_array($participants) ? json_encode($participants) : $participants;
+        return $this;
+    }
+
+    public function setCapacity(int $capacity): TableModel
+    {
+        $this->capacity = $capacity;
+        return $this;
+    }
+
+    public function isBasicDataSet(): bool
+    {
+        return !empty($this->tableId) && !empty($this->tableName) && !empty($this->capacity);
+    }
+
+    public function verifyNoDuplicate()
+    {
+        $check = App::$app->database->findOne('tables', ['tableId' => $this->tableId], class:TableModel::class);
+        return !$check instanceof TableModel;
+    }
+
+    public function createTable()
+    {
+        return App::$app->database->insert('tables', ['tableId', 'capacity', 'tableName', 'participants'], $this);
     }
 }

@@ -37,7 +37,6 @@ class UserController extends Controller
                 '/view_tables' => [['fa-check-to-slot', 'fa-eye'], 'View Tables', true],
                 '/crud_users' => [['fa-users', 'fa-pencil-alt'], 'Edit Users', true],
                 '/find_user' => [['fa-users', 'fa-magnifying-glass'], 'Find User Record', true],
-                '/analysis_attendance' => [['fa-users', 'fa-chart-pie-simple'], 'Analysis Kehadiran', true],
                 '/crud_announcements' => [['fa-megaphone', 'fa-pencil-alt'], 'Edit Announcements', true],
             ],
             'general' => [

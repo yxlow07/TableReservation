@@ -28,17 +28,14 @@ $routes->GET('/forgot_password', 'forgot_password')->only($guest);
 $routes->GET('/announcements', [UserController::class, 'announcements']);
 
 //Admin pages
-$routes->GETPOST('/users/{id}/{action}', [AdminController::class, 'crud_users'])->only($admin);
-$routes->GETPOST('/kehadiran/upload', [AdminController::class, 'upload_kehadiran'])->only($admin);
-$routes->GETPOST('/find_user', [AdminController::class, 'find_student'])->only($admin);
-$routes->GETPOST('/set_date', [AdminController::class, 'set_date'])->only($admin);
-
-// Done
 $routes->GETPOST('/view_tables', [AdminController::class, 'view_tables'])->only($admin);
 $routes->GETPOST('/crud_announcements', [AdminController::class, 'crud_announcements'])->only($admin);
 $routes->GETPOST('/add_admin', [AdminController::class, 'add_admin'])->only($admin);
 $routes->GET('/crud_users', [AdminController::class, 'list_users'])->only($admin);
 $routes->GETPOST('/users/create', [AdminController::class, 'createUsers'])->only($admin);
 $routes->GETPOST('/users/upload', [AdminController::class, 'uploadUsers'])->only($admin);
+$routes->GETPOST('/users/{id}/{action}', [AdminController::class, 'crud_users'])->only($admin);
+$routes->GETPOST('/find_user', [AdminController::class, 'find_student'])->only($admin);
+$routes->GETPOST('/tables/upload', [AdminController::class, 'upload_tables'])->only($admin);
 
 return $routes;
