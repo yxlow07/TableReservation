@@ -5,6 +5,7 @@ namespace app\Controllers;
 use app\Exceptions\MethodNotAllowedException;
 use app\Exceptions\UserNotFoundException;
 use app\Models\AdminModel;
+use app\Models\AnnouncementModel;
 use app\Models\LoginModel;
 use app\Models\ProfileModel;
 use app\Models\RegisterModel;
@@ -76,6 +77,27 @@ class AdminController extends Controller
         $this->render('user_profile', ['data' => $data, 'action' => $action]);
     }
 
+    public function crud_tables($tableId, $action): void
+    {
+        $model = TableModel::getTableFromDatabase($tableId);
+
+        if ($model === false) {
+            throw new \Exception('Table not found', 400);
+        }
+
+        match ($action) {
+            BaseModel::UPDATE => $this->editTable($model),
+            BaseModel::DELETE => TableModel::deleteTableFromDatabase($tableId),
+            default => $data = BaseModel::UNDEFINED,
+        };
+
+        if ($data === BaseModel::UNDEFINED) {
+            throw new MethodNotAllowedException();
+        }
+
+        redirect('/view_tables');
+    }
+
     private function editUser($data): void
     {
         $model = new ProfileModel($data);
@@ -103,7 +125,7 @@ class AdminController extends Controller
         $this->render('crud_announcements', ['announcements' => $data]);
     }
 
-    private function uploadAnnouncements(): void
+    private function uploadAnnouncements($upload = false): void
     {
         $data = json_decode(App::$app->request->data(true), true);
         $msg = ''; $status = false;
@@ -117,7 +139,11 @@ class AdminController extends Controller
             }
             $id = $data['id'];
             unset($data['id']);
-            $status = App::$app->database->update('announcements', ['title', 'summary', 'content'], $data, ['id' => $id]);
+            if ($upload) {
+                $status = App::$app->database->insert('announcements', ['title', 'summary', 'content'], $data);
+            } else {
+                $status = App::$app->database->update('announcements', ['title', 'summary', 'content'], $data, ['id' => $id]);
+            }
         }
 
         App::$app->response->sendJson(['status' => $status, 'msg' => $msg], true);
@@ -197,7 +223,7 @@ class AdminController extends Controller
         $this->render('displayTables', ['tables' => $tables]);
     }
 
-    public function upload_tables()
+    public function upload_tables(): void
     {
         $uploadResults = [];
 
@@ -234,5 +260,28 @@ class AdminController extends Controller
         }
 
         $this->render('upload', ['results' => $uploadResults, 'subject' => 'Tables']);
+    }
+
+    public function create_announcement(): void
+    {
+        $model = new AnnouncementModel(App::$app->request->data());
+
+        if (App::$app->request->isMethod('post')) {
+            if ($model->validate()) {
+                if (App::$app->database->insert('announcements', ['title', 'summary', 'content', 'type'], $model)) {
+                    App::$app->session->setFlashMessage('success', 'Announcement created successfully');
+                    redirect('/crud_announcements');
+                } else {
+                    App::$app->session->setFlashMessage('error', 'Failed to create announcement (database)');
+                }
+            }
+        }
+
+        $this->render('create_announcement', ['model' => $model]);
+    }
+
+    private function editTable(TableModel|bool $model)
+    {
+
     }
 }

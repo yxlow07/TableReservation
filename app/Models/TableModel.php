@@ -160,4 +160,15 @@ class TableModel extends BaseModel
     {
         return App::$app->database->insert('tables', ['tableId', 'capacity', 'tableName', 'participants'], $this);
     }
+
+    public static function getTableFromDatabase($tableId): TableModel|bool
+    {
+        return App::$app->database->findOne('tables', ['tableId' => $tableId], class: TableModel::class);
+    }
+
+    public static function deleteTableFromDatabase(string $tableId): void
+    {
+        $res = App::$app->database->delete('tables', ['tableId' => $tableId]);
+        App::$app->response->sendJson(['status' => $res, 'msg' => $res ? "Successfully deleted table" : "Failed to delete table"], true);
+    }
 }

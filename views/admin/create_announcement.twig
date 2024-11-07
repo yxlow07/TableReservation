@@ -1,0 +1,78 @@
+{% extends 'user_layout.twig' %}
+{% block content %}
+    <main class="w-full max-w-md mx-auto">
+        <div class="mt-7 bg-white border border-gray-200 rounded-xl shadow-sm dark:bg-gray-800 dark:border-gray-700">
+            <div class="p-4 sm:p-7">
+                <div class="text-center">
+                    <h1 class="block text-2xl font-bold text-gray-800 dark:text-white">Create an announcement</h1>
+                </div>
+
+                <div class="mt-5">
+                    <!-- Creation Form -->
+                    <form class="mt-6" action="" method="post">
+                        <div class="grid gap-y-4">
+                            <!-- Form Group for title -->
+                            <div>
+                                <div class="flex items-center justify-between">
+                                    <label for="title" class="block text-sm font-medium leading-6 text-gray-900 dark:text-white">Title*</label>
+                                </div>
+                                <div class="mt-2">
+                                    <input name="title" placeholder="Enter your title here" value="{{ model.title }}" type="text" class="c-input {{ model.errors.title is not empty ? 'ring-red-500' : 'dark:ring-gray-300' }} focus:{{ model.errors.title is not empty ? 'ring-red-500 focus:border-red-500' : 'ring-blue-500 focus:border-blue-500' }}">
+                                    {% if model.errors.title is not empty %}
+                                        <div class="mt-1 text-red-500 text-sm first-letter:capitalize">{{ model.errors.title[0] }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <!-- End Form Group for title -->
+
+                            <!-- Form Group for summary -->
+                            <div>
+                                <div class="flex items-center justify-between">
+                                    <label for="summary" class="block text-sm font-medium leading-6 text-gray-900 dark:text-white">Summary</label>
+                                </div>
+                                <div class="mt-2">
+                                    <input name="summary" placeholder="Enter your summary here" value="{{ model.summary }}" type="text" class="c-input {{ model.errors.summary is not empty ? 'ring-red-500' : 'dark:ring-gray-300' }} focus:{{ model.errors.summary is not empty ? 'ring-red-500 focus:border-red-500' : 'ring-blue-500 focus:border-blue-500' }}">
+                                    {% if model.errors.summary is not empty %}
+                                        <div class="mt-1 text-red-500 text-sm first-letter:capitalize">{{ model.errors.summary[0] }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <!-- End Form Group for summary -->
+
+                            <!-- Form Group for content -->
+                            <div>
+                                <div class="flex items-center justify-between">
+                                    <label for="content" class="block text-sm font-medium leading-6 text-gray-900 dark:text-white">Content*</label>
+                                </div>
+                                <div class="mt-2">
+                                    <textarea rows="7" name="content" placeholder="Enter your content here" value="{{ model.content }}" type="text" class="c-input {{ model.errors.content is not empty ? 'ring-red-500' : 'dark:ring-gray-300' }} focus:{{ model.errors.content is not empty ? 'ring-red-500 focus:border-red-500' : 'ring-blue-500 focus:border-blue-500' }}"></textarea>
+                                    {% if model.errors.content is not empty %}
+                                        <div class="mt-1 text-red-500 text-sm first-letter:capitalize">{{ model.errors.content[0] }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <!-- End Form Group for class -->
+
+                            <!-- Form Group for type -->
+                            <div>
+                                <div class="flex items-center justify-between">
+                                    <label for="type" class="block text-sm font-medium leading-6 text-gray-900 dark:text-white">Type of Announcement*</label>
+                                </div>
+                                <div class="mt-2">
+                                    <input name="type" placeholder="Enter your type here .. general" value="{{ model.type }}" type="type" class="c-input {{ model.errors.type is not empty ? 'ring-red-500' : 'dark:ring-gray-300' }} focus:{{ model.errors.type is not empty ? 'ring-red-500 focus:border-red-500' : 'ring-blue-500 focus:border-blue-500' }}">
+                                    {% if model.errors.type is not empty %}
+                                        <div class="mt-1 text-red-500 text-sm first-letter:capitalize">{{ model.errors.type[0] }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <!-- End Form Group for type -->
+
+                            <button type="submit" class="c-form-btn">Create new announcement</button>
+                        </div>
+                    </form>
+                    <!-- End Creation Form -->
+                </div>
+            </div>
+        </div>
+    </main>
+{% endblock %}

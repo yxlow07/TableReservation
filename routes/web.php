@@ -37,5 +37,7 @@ $routes->GETPOST('/users/upload', [AdminController::class, 'uploadUsers'])->only
 $routes->GETPOST('/users/{id}/{action}', [AdminController::class, 'crud_users'])->only($admin);
 $routes->GETPOST('/find_user', [AdminController::class, 'find_student'])->only($admin);
 $routes->GETPOST('/tables/upload', [AdminController::class, 'upload_tables'])->only($admin);
+$routes->GETPOST('/tables/{tableId}/{action}', [AdminController::class, 'crud_tables'])->only($admin);
+$routes->GETPOST('/create_announcement', [AdminController::class, 'create_announcement'])->only($admin);
 
 return $routes;
